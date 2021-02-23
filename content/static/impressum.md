@@ -3,12 +3,12 @@
 ### Die folgenden Angaben entsprechen den Vorgaben von § 5 TMG:
 
 ```
-Max Mustermann
-Musterstraße 123
-12345 Musterhausen
+Florian Schütte	
+Wendenring 12
+38114 Braunschweig
 
-Telefon: + 49 (0) 1234 12345789
-E-Mail-Adresse: webmaster@example.com
+Telefon: + 49 (0) 531 34960491
+E-Mail-Adresse: webmaster@florian-schuette.de
 ```
 
 ### Haftung für Inhalte:
