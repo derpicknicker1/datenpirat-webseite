@@ -53,18 +53,18 @@ if($id !== false){  // dynamic page found!
     $file = $page['file'];
     $subDir = $page['dir'] ? $page['dir'].'/' : '';
     $title = htmlentities($page['basename']);
-    $content = parse_md_file($content_folder, $subDir.$file);
+    $content = parse_md_file($content_folder, $subDir.$file, $page['link']);
 }
 else{   // dynamic page not found
     $static_id = find_entry($static_pages,$request);
     if($static_id !== false){  // static page found!
         $page = $static_pages[array_keys($static_pages)[$static_id]];
         $file = $page['file'];
-        $content = parse_md_file($static_folder, "/$file");
+        $content = parse_md_file($static_folder, "/$file", $page['link']);
     }
     else{
         http_response_code(404);
-        $content = parse_md_file($static_folder, "/404.md");
+        $content = parse_md_file($static_folder, "/404.md", "");
     }
 }
 
@@ -162,8 +162,8 @@ function list_files($path, $filter, $subDir=""){
         }
         if(!starts_with($file,'.') && ends_with($file,$filter)){
             $basename = basename($file, $filter);
-            $cache_file = "$path/cache/" . basename($file). ".cache";
             $link = ($subDir? format_link($subDir): '').format_link($basename);
+            $cache_file = "cache/" . $link. ".cache";
             $time = filemtime("$path/$file");
 
             if(file_exists($cache_file))
@@ -213,13 +213,13 @@ function find_entry($haystack, $needle ){
     return array_search( $needle, array_column($haystack, "link"));
 }
 
-function parse_md_file($content_folder, $file){
+function parse_md_file($content_folder, $file, $link){
     $text = file_get_contents("$content_folder/$file");
     if(preg_match("/^\[(github|softlink)\]\((.*)\)$/",$text, $matches, PREG_UNMATCHED_AS_NULL)) {
         $type = $matches[1];
         $url = $matches[2];
         $basename = basename($file);
-        $cache_file = "$content_folder/cache/$basename.cache" ;
+        $cache_file = "cache/$link.cache" ;
         if(file_exists($cache_file)) {
             if(time() - filemtime($cache_file) > 86400) {
                 // too old , re-fetch
