@@ -20,6 +20,7 @@ $static_folder = "./static";
 $request = "thats-me";       // init page, keep empty for the last post
 $title = "fl0rian.sch&uuml;tte";
 $theme = "dark";
+$mainPagesTop = false;
 
 $content = "";
 $id = 0;
@@ -39,7 +40,7 @@ if(isset($_GET['theme']) && !empty($_GET['theme'])){
 }
 
 if(isset($_GET['p']) && !empty($_GET['p']))
-    $request = $_GET['p']; //format_link($_GET['p']);
+    $request = format_link($_GET['p']);
 else
     $is_welcome_page = true;
 
@@ -86,39 +87,24 @@ else{   // dynamic page not found
         <?php 
 
             $subMenus = array();
-            $selected = '';
 
-            if (strpos($request, '/') !== false)
-                list($selected) = explode('/', $request);
+            if($mainPagesTop)
+               displayMenu($pages, "", $request);
 
-            foreach ($pages as $keyTop => $valueTop){
+            foreach ($pages as $key => $val){
 
-                if (!in_array($valueTop['dir'], $subMenus)) {
-                    array_push($subMenus, $valueTop['dir']);
-
-                    if($valueTop['dir'] !== ""){
-                        $sel = !boolval(strcmp($valueTop['dir'], $selected));
-                        echo "\t\t<a id=\"".$valueTop['dir']."-head\" rel=\"keep-params\" class=\"menu-head ".($sel? 'selected' : '')."\" href=\"#\" onclick=\"showMenu('".$valueTop['dir']."')\">".$valueTop['dir']."</a>\n";
-                        echo "\t\t<div id=\"".$valueTop['dir']."-list\" style=\"display:".($sel?"block":"none").";\" class=\"sub-menu\">";
-                    }
-
-                    foreach ($pages as $key => $value){
-
-                        if($value['dir'] == $valueTop['dir']) {
-                            $text = $value["basename"];
-                            $link = $value["link"];
-                            $time = $value["time"];
-                            echo "\t\t<a rel=\"keep-params\" " . ($request == $link ? "class=\"active\"" : "") . " href=\"/$link\">$text</a>\n";
-                            echo "\t\t<span class=\"nav-time\">" . date ("d.m.Y H:i", $time) . "</span>\n";
-                        }
-
-                    }
-
-                    if($valueTop['dir'] != "")
-                        echo "\t\t</div>\n";
+                if ($val['dir'] !== "" && !in_array($val['dir'], $subMenus)) {
+                    array_push($subMenus, $val['dir']);
+                    $sel = !boolval(strcmp($val['dir'], $page['dir']));
+                    echo "\t\t<a id=\"".$val['dir']."-head\" rel=\"keep-params\" class=\"menu-head ".($sel? 'selected' : '')."\" onclick=\"showMenu('".$val['dir']."')\">".$val['dir']."</a>\n";
+                    echo "\t\t<div id=\"".$val['dir']."-list\" style=\"display:".($sel?"block":"none").";\" class=\"sub-menu\">";
+                    displayMenu($pages, $val['dir'], $request);
+                    echo "\t\t</div>\n";
                 }
-                
             }
+
+            if(!$mainPagesTop)
+               displayMenu( $pages, "",$request);
             
         ?>
             <div class="static">
@@ -176,7 +162,7 @@ function list_files($path, $filter, $subDir=""){
         if(!starts_with($file,'.') && ends_with($file,$filter)){
             $basename = basename($file, $filter);
             $cache_file = "$path/cache/" . basename($file). ".cache";
-            $link = ($subDir? $subDir.'/' : '').format_link($basename);
+            $link = ($subDir? format_link($subDir): '').format_link($basename);
             $time = filemtime("$path/$file");
 
             if(file_exists($cache_file))
@@ -194,6 +180,18 @@ function list_files($path, $filter, $subDir=""){
     closedir($dir);
     krsort($list);
     return $list;
+}
+
+function displayMenu( $pages, $name, $request ){
+    foreach ($pages as $key => $value){
+        if($value['dir'] == $name) {
+            $text = $value["basename"];
+            $link = $value["link"];
+            $time = $value["time"];
+            echo "\t\t<a rel=\"keep-params\" " . ($request == $link ? "class=\"active\"" : "") . " href=\"/$link\">$text</a>\n";
+            echo "\t\t<span class=\"nav-time\">" . date ("d.m.Y H:i", $time) . "</span>\n";
+        }
+    }
 }
 
 function starts_with( $haystack, $needle ) {
@@ -237,7 +235,7 @@ function parse_md_file($content_folder, $file){
             $cache = file_get_contents($url);
             if($cache === false) {
                 http_response_code(404);
-                $cache = file_get_contents("$content_folder/static/404.md");
+                $cache = file_get_contents("$static_folder/404.md");
             }
             else {
                 if($type === "github")
