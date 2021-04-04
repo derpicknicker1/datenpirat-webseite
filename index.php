@@ -21,6 +21,7 @@ $request = "thats-me";       // init page, keep empty for the last post
 $title = "fl0rian.sch&uuml;tte";
 $theme = "dark";
 $mainPagesTop = false;
+$expandSelectedSubMenu = true;
 
 $content = "";
 $id = 0;
@@ -95,7 +96,7 @@ else{   // dynamic page not found
 
                 if ($val['dir'] !== "" && !in_array($val['dir'], $subMenus)) {
                     array_push($subMenus, $val['dir']);
-                    $sel = !boolval(strcmp($val['dir'], $page['dir']));
+                    $sel = !boolval(strcmp($val['dir'], $page['dir'])) && $expandSelectedSubMenu;
                     echo "\t\t<a id=\"".$val['dir']."-head\" rel=\"keep-params\" class=\"menu-head ".($sel? 'selected' : '')."\" onclick=\"showMenu('".$val['dir']."')\">".$val['dir']."</a>\n";
                     echo "\t\t<div id=\"".$val['dir']."-list\" style=\"display:".($sel?"block":"none").";\" class=\"sub-menu\">";
                     displayMenu($pages, $val['dir'], $request);
